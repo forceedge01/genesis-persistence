@@ -58,7 +58,7 @@ class MapperService implements Contracts\MapperInterface
         $values = $this->getPropertiesValue($object, $properties);
 
         if (!empty($values['id'])) {
-            $this->databaseService->update($table, $values, ['id' => $values['id']]);
+            return $this->databaseService->update($table, $values, ['id' => $values['id']]);
         }
 
         // If the id column is present and we are about to save this as a new record,
