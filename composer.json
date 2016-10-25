@@ -1,7 +1,17 @@
 {
-    "Author": {
-        "name": "Wahab Qureshi",
-        "email": "its.inevitable@hotmail.com"
+    "name":         "genesis/persistence",
+    "author": [
+        {
+            "name": "Wahab Qureshi",
+            "email": "its.inevitable@hotmail.com",
+            "homepage": "http://inevitabletech.uk"
+        }
+    ],
+    "require": {
+        "php": "~5.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.5"
     },
     "autoload": {
         "psr-4": {
