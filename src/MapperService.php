@@ -22,11 +22,10 @@ class MapperService implements Contracts\MapperInterface
         $table = $this->getTableFromClass($class);
         $properties = $this->getPropertiesWithTypesFromClass($class);
 
-        $query = "CREATE TABLE IF NOT EXISTS $table (";
+        $query = "CREATE TABLE IF NOT EXISTS `$table` (";
 
         foreach ($properties as $property => $type) {
-            $sqlise = strtoupper($type);
-            $query .= "`$property` $sqlise, ";
+            $query .= "`$property` $type, ";
         }
 
         $query = rtrim($query, ', ');
@@ -59,7 +58,7 @@ class MapperService implements Contracts\MapperInterface
         $values = $this->getPropertiesValue($object, $properties);
 
         if (!empty($values['id'])) {
-            throw new Exception('Object has already been saved, update logic not implemented yet.');
+            $this->databaseService->update($table, $values, ['id' => $values['id']]);
         }
 
         // If the id column is present and we are about to save this as a new record,
@@ -75,7 +74,7 @@ class MapperService implements Contracts\MapperInterface
     public function get($class, array $args = [])
     {
         if (! in_array(Contracts\ModelInterface::class, class_implements($class))) {
-            throw new Exception("Invalid class given: '$class', must implement Representation!");
+            throw new Exception("Invalid class given: '$class', must implement BaseModel!");
         }
 
         $table = $this->getTableFromClass($class);

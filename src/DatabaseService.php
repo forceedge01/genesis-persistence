@@ -99,6 +99,17 @@ class DatabaseService implements Contracts\StoreInterface
         return $this;
     }
 
+    public function update($table, array $update, array $where = [])
+    {
+        $updateClause = $this->getUpdateClauseFromArray($update);
+
+        if ($where) {
+            $whereClause = 'WHERE ' . $this->getWhereClauseFromArray($where);
+        }
+
+        $query = "UPDATE $table SET $updateClause $whereClause";
+    }
+
     private function checkForErrors($query)
     {
         if ($this->connection->errorCode() !== '00000') {
@@ -118,13 +129,36 @@ class DatabaseService implements Contracts\StoreInterface
         $where = '';
 
         foreach ($whereArray as $column => $value) {
-            $value = "'$value'";
+            $value = $this->quoteValue($value);
             $where .= "`$column` = $value AND ";
         }
 
         $where = rtrim($where, 'AND ');
 
         return $where;
+    }
+
+    private function getUpdateClauseFromArray(array $updateArray)
+    {
+        $update = '';
+
+        foreach ($updateArray as $column => $value) {
+            $value = $this->quoteValue($value);
+            $update .= "`$column` = $value, ";
+        }
+
+        $update = rtrim($update, ', ');
+
+        return $update;
+    }
+
+    private function quoteValue($value)
+    {
+        $excludePattern = '/^(null)|(count\(.+\))|(sum\(.+\))|date\(.+\)|now\(\)$/';
+
+        $value = (is_numeric($value) || preg_match($excludePattern, strtolower($value))) ? $value : "'$value'";
+
+        return $value;
     }
 
     private function getValuesClauseFromArray(array $values)
@@ -134,7 +168,8 @@ class DatabaseService implements Contracts\StoreInterface
 
         foreach ($values as $column => $value) {
             $columns .= '`' . $column . '`, ';
-            $columnValues .= (is_string($value)) ? "'$value', " : "$value, ";
+            $value = $this->quoteValue($value);
+            $columnValues .= "$value, ";
         }
 
         $columns = substr($columns, 0, -2);
