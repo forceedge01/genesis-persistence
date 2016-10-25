@@ -1,0 +1,11 @@
+{
+    "Author": {
+        "name": "Wahab Qureshi",
+        "email": "its.inevitable@hotmail.com"
+    },
+    "autoload": {
+        "psr-4": {
+            "Genesis\\Services\\Persistence\\": "src/"
+        }
+    }
+}
