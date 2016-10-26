@@ -85,7 +85,7 @@ class MapperService implements Contracts\MapperInterface
             $data = $this->databaseService->getAll($table);
         }
 
-        return $this->bindToObject($class, $data);
+        return $this->bindToModel($class, $data);
     }
 
     public function getSingle($class, array $args = [], $order = 'asc')
@@ -94,12 +94,36 @@ class MapperService implements Contracts\MapperInterface
         $data = $this->databaseService->getSingle($table, $args, $order);
 
         if ($data) {
-            $collection = $this->bindToObject($class, [$data]);
+            $collection = $this->bindToModel($class, [$data]);
 
             return $collection[0];
         }
 
         return false;
+    }
+
+    public function getTableFromClass($class)
+    {
+        $chunks = explode('\\', $class);
+
+        return end($chunks);
+    }
+
+    public function bindToModel($class, array $data)
+    {
+        if (! $data) {
+            return [];
+        }
+
+        $collection = [];
+
+        foreach ($data as $record) {
+            $object = new $class();
+            $this->setObjectPropertyValues($object, $record);
+            $collection[] = $object;
+        }
+
+        return $collection;
     }
 
     private function getPropertiesFromClass($class)
@@ -114,13 +138,6 @@ class MapperService implements Contracts\MapperInterface
         $reflection = new ReflectionClass($class);
 
         return $reflection->getDefaultProperties();
-    }
-
-    private function getTableFromClass($class)
-    {
-        $chunks = explode('\\', $class);
-
-        return end($chunks);
     }
 
     private function getPropertiesValue($object, array $properties)
@@ -142,22 +159,5 @@ class MapperService implements Contracts\MapperInterface
         }
 
         return $object;
-    }
-
-    private function bindToObject($class, array $data)
-    {
-        if (! $data) {
-            return [];
-        }
-
-        $collection = [];
-
-        foreach ($data as $record) {
-            $object = new $class();
-            $this->setObjectPropertyValues($object, $record);
-            $collection[] = $object;
-        }
-
-        return $collection;
     }
 }
