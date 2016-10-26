@@ -77,4 +77,32 @@ class App
 
 ```
 
+The mapper exposes the databaseService which allows you to perform more complex queries while still binding objects back to the original models. Consider the following example
+
+```php
+
+namespace myApp;
+
+use Genesis\Services\Persistence;
+
+class SomeRepository
+{
+    public function getSomeBasedForPastSevenDays(Persistence\Contracts\MapperService $mapperService)
+    {
+        // Get the database table name based on the model.
+        $table = $mapperService->getTableFromClass(Representations\Sale::class);
+
+        // Prepare a more complex query, we can only bind objects back if we have all columns corresponding to the model.
+        $query = "SELECT * FROM `{$table}` WHERE `dateSold` > (SELECT DATETIME('now', '-7 day')) AND `userId` = {$userId}";
+
+        // Execute the query using the databaseService layer and get the data back.
+        $data = $mapperService->getDatabaseService()->execute($query);
+
+        // Bind the data to the model and return the collection.
+        return $mapperService->bindToModel(Representations\Sale::class, $data);   
+    }
+}
+
+```
+
 Feel free to explore other calls provided by the mapperService. The mapper also allows you to create tables based on a model.
