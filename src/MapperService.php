@@ -17,6 +17,11 @@ class MapperService implements Contracts\MapperInterface
         $this->databaseService = $databaseService;
     }
 
+    public function getDatabaseService()
+    {
+        return $this->databaseService;
+    }
+
     public function createTable($class)
     {
         $table = $this->getTableFromClass($class);
