@@ -76,7 +76,7 @@ class MapperService implements Contracts\MapperInterface
         return $object;
     }
 
-    public function get($class, array $args = [])
+    public function get($class, array $args = [], $order = 'asc')
     {
         if (! in_array(Contracts\ModelInterface::class, class_implements($class))) {
             throw new Exception("Invalid class given: '$class', must implement BaseModel!");
@@ -85,9 +85,9 @@ class MapperService implements Contracts\MapperInterface
         $table = $this->getTableFromClass($class);
 
         if ($args) {
-            $data = $this->databaseService->get($table, $args);
+            $data = $this->databaseService->get($table, $args, $order);
         } else {
-            $data = $this->databaseService->getAll($table);
+            $data = $this->databaseService->getAll($table, $order);
         }
 
         return $this->bindToModel($class, $data);

@@ -48,17 +48,19 @@ class DatabaseService implements Contracts\StoreInterface
         return $result;
     }
 
-    public function get($table, array $where)
+    public function get($table, array $where, $order = 'asc')
     {
         $whereClause = $this->getWhereClauseFromArray($where);
-        $query =  "SELECT * FROM `$table` WHERE $whereClause";
+        $orderClause = $this->getOrderClause($order);
+        $query =  "SELECT * FROM `$table` WHERE $whereClause $orderClause";
 
         return $this->execute($query);
     }
 
-    public function getAll($table)
+    public function getAll($table, $order = 'asc')
     {
-        $query =  "SELECT * FROM `$table`";
+        $orderClause = $this->getOrderClause($order);
+        $query =  "SELECT * FROM `$table` $orderClause";
 
         return $this->execute($query);
     }
@@ -70,9 +72,9 @@ class DatabaseService implements Contracts\StoreInterface
 
         if ($where) {
             $whereClause = 'WHERE ' . $this->getWhereClauseFromArray($where);
-            $firstColumn = 'ORDER BY ' . array_keys($where)[0] . ' ' . $order;
+            $firstColumn = 'ORDER BY `' . array_keys($where)[0] . '` ' . $order;
         } else {
-            $firstColumn = 'ORDER BY `id` ' . $order;
+            $firstColumn = $this->getOrderClause($order);
         }
 
         $query =  "SELECT * FROM `$table` $whereClause {$firstColumn} LIMIT 1";
@@ -83,6 +85,11 @@ class DatabaseService implements Contracts\StoreInterface
         }
 
         return false;
+    }
+
+    private function getOrderClause($order)
+    {
+        return 'ORDER BY `id` ' . $order;
     }
 
     public function delete($table, array $where = [])
@@ -108,6 +115,9 @@ class DatabaseService implements Contracts\StoreInterface
         }
 
         $query = "UPDATE $table SET $updateClause $whereClause";
+        $this->execute($query);
+
+        return $this;
     }
 
     private function checkForErrors($query)
