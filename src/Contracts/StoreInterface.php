@@ -9,7 +9,9 @@ interface StoreInterface
 {
     public function save($table, array $values);
 
-    public function get($table, array $where);
+    public function get($table, array $where, $order);
+
+    public function getAll($table, $order);
 
     public function getSingle($table, array $where, $orderBy);
 
