@@ -55,7 +55,7 @@ class App
         // If say a form is submitted.
         if ($form->isSubmitted()) {
             // Get a specific record from the database mapped to your model object.
-            $mySpecificItemModel = $mapperService->get(MyItemModel::class, ['id' => $form->get('item_id')]);
+            $mySpecificItemModel = $mapperService->getSingle(MyItemModel::class, ['id' => $form->get('item_id')]);
 
             // Update model with desired data. Note the setters/getters are provided out of the box by just
             // extending the baseModel.
