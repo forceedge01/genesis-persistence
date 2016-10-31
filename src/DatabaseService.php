@@ -48,7 +48,7 @@ class DatabaseService implements Contracts\StoreInterface
         return $result;
     }
 
-    public function get($table, array $where, $order = 'asc')
+    public function get($table, array $where, array $order = ['id' => 'asc'])
     {
         $whereClause = $this->getWhereClauseFromArray($where);
         $orderClause = $this->getOrderClause($order);
@@ -57,7 +57,7 @@ class DatabaseService implements Contracts\StoreInterface
         return $this->execute($query);
     }
 
-    public function getAll($table, $order = 'asc')
+    public function getAll($table, array $order = ['id' => 'asc'])
     {
         $orderClause = $this->getOrderClause($order);
         $query =  "SELECT * FROM `$table` $orderClause";
@@ -65,19 +65,20 @@ class DatabaseService implements Contracts\StoreInterface
         return $this->execute($query);
     }
 
-    public function getSingle($table, array $where = [], $order = 'asc')
+    public function getSingle($table, array $where = [], array $order = ['id' => 'asc'])
     {
         $whereClause = '';
-        $firstColumn = '';
+        $orderBy = '';
 
         if ($where) {
             $whereClause = 'WHERE ' . $this->getWhereClauseFromArray($where);
-            $firstColumn = 'ORDER BY `' . array_keys($where)[0] . '` ' . $order;
-        } else {
-            $firstColumn = $this->getOrderClause($order);
         }
 
-        $query =  "SELECT * FROM `$table` $whereClause {$firstColumn} LIMIT 1";
+        if ($order) {
+            $orderBy = $this->getOrderClause($order);
+        }
+
+        $query =  "SELECT * FROM `$table` $whereClause {$orderBy} LIMIT 1";
         $result = $this->execute($query);
 
         if (isset($result[0])) {
@@ -87,9 +88,12 @@ class DatabaseService implements Contracts\StoreInterface
         return false;
     }
 
-    private function getOrderClause($order)
+    private function getOrderClause(array $order)
     {
-        return 'ORDER BY `id` ' . $order;
+        $column = key($order);
+        $value = current($order);
+
+        return "ORDER BY `$column` $value";
     }
 
     public function delete($table, array $where = [])

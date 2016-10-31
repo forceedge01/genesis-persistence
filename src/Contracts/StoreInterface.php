@@ -9,11 +9,11 @@ interface StoreInterface
 {
     public function save($table, array $values);
 
-    public function get($table, array $where, $order);
+    public function get($table, array $where, array $order = ['id' => 'asc']);
 
-    public function getAll($table, $order);
+    public function getAll($table, array $order = ['id' => 'asc']);
 
-    public function getSingle($table, array $where, $orderBy);
+    public function getSingle($table, array $where, array $order = ['id' => 'asc']);
 
     public function delete($table, array $where);
 }

@@ -41,6 +41,18 @@ class MapperService implements Contracts\MapperInterface
 
     public function delete($class, array $where = [])
     {
+        if (is_object($class)) {
+            $obj = $class;
+            $class = get_class($obj);
+            $id = $obj->getId();
+
+            if (! $id) {
+                throw new Exception("Object of type '$class' passed in must have an id to perform operation.");
+            }
+
+            $where = ['id' => $id];
+        }
+
         $table = $this->getTableFromClass($class);
 
         return $this->databaseService->delete($table, $where);
@@ -76,7 +88,7 @@ class MapperService implements Contracts\MapperInterface
         return $object;
     }
 
-    public function get($class, array $args = [], $order = 'asc')
+    public function get($class, array $args = [], array $order = ['id' => 'asc'])
     {
         if (! in_array(Contracts\ModelInterface::class, class_implements($class))) {
             throw new Exception("Invalid class given: '$class', must implement BaseModel!");
@@ -93,7 +105,7 @@ class MapperService implements Contracts\MapperInterface
         return $this->bindToModel($class, $data);
     }
 
-    public function getSingle($class, array $args = [], $order = 'asc')
+    public function getSingle($class, array $args = [], array $order = ['id' => 'asc'])
     {
         $table = $this->getTableFromClass($class);
         $data = $this->databaseService->getSingle($table, $args, $order);

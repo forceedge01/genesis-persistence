@@ -13,7 +13,7 @@ interface MapperInterface
 
     public function persist($object);
 
-    public function get($class, array $args = [], $order = 'asc');
+    public function get($class, array $args = [], array $order = ['id' => 'asc']);
 
-    public function getSingle($class, array $args = [], $order = 'asc');
+    public function getSingle($class, array $args = [], array $order = ['id' => 'asc']);
 }

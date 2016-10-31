@@ -105,4 +105,46 @@ class SomeRepository
 
 ```
 
+Deleting records
+----------------
+
+The mapper allows you to delete records in two ways. Consider the example below.
+
+```php
+
+namespace myApp;
+
+use Genesis\Services\Persistence;
+
+class App
+{
+    public function deleteExampleOne()
+    {
+        $mapperService = ...;
+
+        // If say a delete request comes in.
+        if ($this->issetGet('delete')) {
+            // Get the product Id from the request.
+            $productId = $this->getParam('productId');
+
+            // Delete the record.
+            $mapperService->delete(Product::class, ['id' => $productId]);
+        }
+
+        ...
+    }
+
+    // If say the product object was passed into the method.
+    public function deleteExampleTwo(Product $product)
+    {
+        $mapperService = ...;
+
+        // This will delete the record from the database as long as the object can give back the id of the
+        // record using the getId() getter.
+        $mapperService->delete($product);
+    }
+}
+
+```
+
 Feel free to explore other calls provided by the mapperService. The mapper also allows you to create tables based on a model.
