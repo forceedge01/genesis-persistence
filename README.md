@@ -35,22 +35,68 @@ Using a model with the mapper
 
 The mapper provides a simple yet powerful layer of abstraction for you. It understands how your model needs to be saved and retrieved from the database.
 
+Instantiation
+-------------
+
+```php
+
+use Genesis\Services\Persistence;
+
+// Configuration for the databaseService.
+$params = ['dbEngine' => 'sqlite', 'dbPath' => BASE . '/db.sqlite'];
+
+// Create a database service.
+$databaseService = Persistence\DatabaseService($params);
+
+// Create a mapper service which depends on the databaseService.
+$mapperService = new Persistence\MapperService($databaseService);
+
+```
+
 ```php
 
 namespace myApp;
 
-use Genesis\Services\Persistence;
-
 class App
 {
-    public function display()
+    /**
+     * Inserting into the database.
+     */
+    public function insert()
     {
-        $params = [
-            'databaseEngine' => 'sqlite',
-            'path' => BASE . '/db.sqlite'
-        ];
+        $mapperService = ...
 
-        $mapperService = new Persistence\MapperService(Persistence\DatabaseService($params));
+        // If say a form is submitted.
+        if ($form->isSubmitted()) {
+            // Create a new model object for insertion.
+            $mySpecificItemModel = new MyItemModel();
+            $mySpecificItemModel
+                ->setName('whatever you want.')
+                ->setDescription('A great description');
+
+            // Insert new record in the database.
+            $mapperService->persist($mySpecificItemModel);
+
+            if ($mySpecificItemModel->getId()) {
+                $this->message('Record saved successfully.');
+            } else {
+                $this->message('Failed saving record.');
+            }
+        }
+
+        // Get all MyItemModels back.
+        $myItemModels = $mapperService->get(MyItemModel::class);
+
+        // Use the retrieved models somehow.
+        ...
+    }
+
+    /**
+     * Updating the database.
+     */
+    public function update()
+    {
+        $mapperService = ...
 
         // If say a form is submitted.
         if ($form->isSubmitted()) {
@@ -58,7 +104,7 @@ class App
             $mySpecificItemModel = $mapperService->getSingle(MyItemModel::class, ['id' => $form->get('item_id')]);
 
             // Update model with desired data. Note the setters/getters are provided out of the box by just
-            // extending the baseModel.
+            // extending the baseModel which are based on the properties your model has.
             $mySpecificItemModel
                 ->setName('whatever you want.')
                 ->setDescription('A great description');
@@ -87,7 +133,7 @@ use Genesis\Services\Persistence;
 
 class SomeRepository
 {
-    public function getSomeBasedForPastSevenDays(Persistence\Contracts\MapperService $mapperService)
+    public function getSomeItemsForPastSevenDays(Persistence\Contracts\MapperService $mapperService)
     {
         // Get the database table name based on the model.
         $table = $mapperService->getTableFromClass(Representations\Sale::class);
@@ -99,7 +145,7 @@ class SomeRepository
         $data = $mapperService->getDatabaseService()->execute($query);
 
         // Bind the data to the model and return the collection.
-        return $mapperService->bindToModel(Representations\Sale::class, $data);   
+        return $mapperService->bindToModel(Representations\Sale::class, $data);
     }
 }
 
@@ -108,7 +154,7 @@ class SomeRepository
 Deleting records
 ----------------
 
-The mapper allows you to delete records in two ways. Consider the example below.
+The mapper allows you to delete records in two ways. Consider the examples below.
 
 ```php
 
@@ -139,8 +185,8 @@ class App
     {
         $mapperService = ...;
 
-        // This will delete the record from the database as long as the object can give back the id of the
-        // record using the getId() getter.
+        // This will delete the record from the database as long as the getId() method on the object returns
+        // the id of the record.
         $mapperService->delete($product);
     }
 }
