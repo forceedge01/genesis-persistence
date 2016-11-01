@@ -53,6 +53,9 @@ $mapperService = new Persistence\MapperService($databaseService);
 
 ```
 
+Saving and retrieving data.
+---------------------------
+
 ```php
 
 namespace myApp;
@@ -113,8 +116,8 @@ class App
             $mapperService->persist($mySpecificItemModel);
         }
 
-        // Get all MyItemModels back.
-        $myItemModels = $mapperService->get(MyItemModel::class);
+        // Get all MyItemModels back with the name `howdy`, order them by the id descending.
+        $myItemModels = $mapperService->get(MyItemModel::class, ['name' => 'howdy'], ['id' => 'desc']);
 
         // Use the retrieved models somehow.
         ...
