@@ -41,8 +41,9 @@ class DatabaseService implements Contracts\StoreInterface
 
     public function execute($query)
     {
-        $statement = $this->connection->query($query);
+        $statement = $this->connection->prepare($query);
         $this->checkForErrors($query);
+        $statement->execute();
         $result = $statement->fetchAll(PDO::FETCH_ASSOC);
 
         return $result;
@@ -170,7 +171,11 @@ class DatabaseService implements Contracts\StoreInterface
     {
         $excludePattern = '/^(null)|(count\(.+\))|(sum\(.+\))|date\(.+\)|now\(\)$/';
 
-        $value = (is_numeric($value) || preg_match($excludePattern, strtolower($value))) ? $value : "'$value'";
+        if ((is_numeric($value) || preg_match($excludePattern, strtolower($value)))) {
+            $value = $value;
+        } else {
+            $value = '\'' . str_replace("'", "''", $value) . '\'';
+        }
 
         return $value;
     }
