@@ -11,9 +11,11 @@ interface MapperInterface
 
     public function delete($class, array $where = []);
 
-    public function persist($object);
+    public function persist(ModelInterface $object);
 
     public function get($class, array $args = [], array $order = ['id' => 'asc']);
 
     public function getSingle($class, array $args = [], array $order = ['id' => 'asc']);
+
+    public function getAssociated(ModelInterface $object, $associatedClass);
 }

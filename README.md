@@ -154,6 +154,33 @@ class SomeRepository
 
 ```
 
+Retrieving an associated model object
+-------------------------------------
+
+Have you noticed that the `MyItemModel` has a `userId` property, this property would, in an ideal world link to another record in the database in the `User` table. If you have modeled this `User` in your app, you can use the getAssociated call provided by the mapper to get this record out. Consider the example below.
+
+```php
+
+namespace myApp;
+
+class ExampleGetAssociated
+{
+    public function getAssociatedUser()
+    {
+        $mapperService = ...
+
+        // Get a random model for this example.
+        $myItemModel = $mapperService->getSingle(MyItemModel::class, ['id' => 15]);
+
+        // Get the user associated with the $myItemModel object.
+        $user = $mapperService->getAssociated(User::class, $myItemModel);
+
+        ...
+    }
+}
+
+```
+
 Deleting records
 ----------------
 

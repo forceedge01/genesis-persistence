@@ -65,7 +65,7 @@ class MapperService implements Contracts\MapperInterface
      *
      * @return $this
      */
-    public function persist($object)
+    public function persist(Contracts\ModelInterface $object)
     {
         $class = get_class($object);
 
@@ -119,6 +119,29 @@ class MapperService implements Contracts\MapperInterface
         return false;
     }
 
+    public function getAssociated(Contracts\ModelInterface $fromObject, $associatedClass)
+    {
+        // Check if the associated class has a property on the fromObject.
+        $table = $this->getTableFromClass($associatedClass);
+        $tableProperty = lcfirst($table);
+        $associatedProperty = $tableProperty . 'Id';
+
+        if (! property_exists($fromObject, $associatedProperty)) {
+            throw new Exception(sprintf(
+                'Property "%s" does not exist on class "%s" and is not associated.',
+                $associatedProperty,
+                get_class($fromObject)
+            ));
+        }
+
+        $associatedPropertyMethod = 'get' . $table . 'Id';
+
+        return $this->getSingle(
+            $associatedClass,
+            ['id' => $fromObject->$associatedPropertyMethod()]
+        );
+    }
+
     public function getTableFromClass($class)
     {
         $chunks = explode('\\', $class);
@@ -157,7 +180,7 @@ class MapperService implements Contracts\MapperInterface
         return $reflection->getDefaultProperties();
     }
 
-    private function getPropertiesValue($object, array $properties)
+    private function getPropertiesValue(Contracts\ModelInterface $object, array $properties)
     {
         $values = [];
         foreach ($properties as $property) {
@@ -168,7 +191,7 @@ class MapperService implements Contracts\MapperInterface
         return $values;
     }
 
-    private function setObjectPropertyValues($object, array $properties)
+    private function setObjectPropertyValues(Contracts\ModelInterface $object, array $properties)
     {
         foreach ($properties as $property => $value) {
             $call = 'set' . ucfirst($property);
