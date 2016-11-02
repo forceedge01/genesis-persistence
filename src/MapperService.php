@@ -119,7 +119,7 @@ class MapperService implements Contracts\MapperInterface
         return false;
     }
 
-    public function getAssociated(Contracts\ModelInterface $fromObject, $associatedClass)
+    public function getAssociated($associatedClass, Contracts\ModelInterface $fromObject)
     {
         // Check if the associated class has a property on the fromObject.
         $table = $this->getTableFromClass($associatedClass);

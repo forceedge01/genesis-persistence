@@ -17,5 +17,5 @@ interface MapperInterface
 
     public function getSingle($class, array $args = [], array $order = ['id' => 'asc']);
 
-    public function getAssociated(ModelInterface $object, $associatedClass);
+    public function getAssociated($associatedClass, ModelInterface $object);
 }
