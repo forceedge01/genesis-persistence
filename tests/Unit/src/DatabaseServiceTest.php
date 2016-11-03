@@ -1,5 +1,15 @@
 <?php
 
+namespace Genesis\Services\Persistence;
+
+class PDO
+{
+    public function __construct($dsn, $username = null, $password = null, $options = [])
+    {
+        return [$dsn, $username, $password, $options];
+    }
+}
+
 namespace Genesis\Services\Test\Persistence;
 
 use Genesis\Services\Persistence\DatabaseService;
