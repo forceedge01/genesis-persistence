@@ -5,7 +5,7 @@ namespace Genesis\Services\Persistence\Model;
 use Exception;
 use Genesis\Services\Persistence\Contracts\ModelInterface;
 
-class BaseModel implements ModelInterface
+abstract class BaseModel implements ModelInterface
 {
     protected $id = 'integer PRIMARY KEY';
 

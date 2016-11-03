@@ -43,15 +43,50 @@ Instantiation
 use Genesis\Services\Persistence;
 
 // Configuration for the databaseService.
-$params = ['dbEngine' => 'sqlite', 'dbPath' => BASE . '/db.sqlite'];
+$dbParams = ['dbEngine' => 'sqlite', 'dbPath' => BASE . '/db.sqlite'];
 
 // Create a database service.
-$databaseService = Persistence\DatabaseService($params);
+$databaseService = Persistence\DatabaseService($dbParams);
 
 // Create a mapper service which depends on the databaseService.
 $mapperService = new Persistence\MapperService($databaseService);
 
 ```
+
+The library only supports a few databases at the moment and is only tested so far with sqlite. Please use the config below to connect with appropriate drivers.
+
+```php
+
+// SQLite database.
+$dbParams = [
+    'dbengine' => 'sqlite',
+    'path' => __DIR__ . '/db.sqlite'
+];
+
+// MySQL database.
+$dbParams = [
+    'dbengine' => 'mysql',
+    'host' => 'localhost',
+    'port' => 3306,
+    'dbname' => 'myDB',
+    'username' => 'root',
+    'password' => 'password'
+];
+
+// Postgresql database.
+$dbParams = [
+    'dbengine' => 'pgsql',
+    'host' => 'localhost',
+    'port' => 5432,
+    'dbname' => 'myDB',
+    'username' => 'root',
+    'password' => 'password',
+    'sslmode' => 'require'
+];
+
+```
+
+For clarity and to avoid confusion, please define all of the above config for your project. For any info on what they mean please visit the relevant PHP manual pages for the PDO construct.
 
 Saving and retrieving data.
 ---------------------------

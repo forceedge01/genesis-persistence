@@ -15,18 +15,48 @@ class DatabaseService implements Contracts\StoreInterface
     public function __construct(array $params)
     {
         if (! $this->connection) {
-            $this->connection = new PDO($this->getConnectionString($params));
+            $username = $password = null;
+            $options = [];
+
+            if (isset($params['username'])) {
+                $username = $params['username'];
+            }
+
+            if (isset($params['password'])) {
+                $password = $params['password'];
+            }
+
+            if (isset($params['options'])) {
+                $options = $params['options'];
+            }
+
+            $this->connection = new PDO($this->getConnectionString($params), $username, $password, $options);
         }
     }
 
     private function getConnectionString(array $params)
     {
-        switch ($params['databaseEngine']) {
+        if (! isset($params['dbengine'])) {
+            throw new Exception('The database engine must be specified.');
+        }
+
+        switch ($params['dbengine']) {
             case 'sqlite':
                 return "sqlite:{$params['path']}";
+            case 'mysql':
+                if (!isset($params['port'])) {
+                    $params['port'] = 3306;
+                }
 
+                return "mysql:dbname={$params['dbname']};host={$params['host']};port={$params['port']}";
+            case 'pgsql':
+                if (!isset($params['port'])) {
+                    $params['port'] = 5432;
+                }
+
+                return "pgsql:dbname={$params['dbname']};host={$params['host']};port={$params['port']};sslmode={$params['sslmode']}";
             default:
-                throw new Exception("Database {$params['databaseEngine']} is not supported at the moment.");
+                throw new Exception("Database {$params['dbengine']} is not supported at the moment.");
         }
     }
 
