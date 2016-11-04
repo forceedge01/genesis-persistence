@@ -1,15 +1,5 @@
 <?php
 
-namespace Genesis\Services\Persistence;
-
-class PDO
-{
-    public function __construct($dsn, $username = null, $password = null, $options = [])
-    {
-        return [$dsn, $username, $password, $options];
-    }
-}
-
 namespace Genesis\Services\Test\Persistence;
 
 use Genesis\Services\Persistence\DatabaseService;
@@ -39,7 +29,7 @@ class DatabaseServiceTest extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->dependencies = [
-            'Name of dependency' => null, //nmock
+            ['dbengine' => 'sqlite', 'path' => ':memory:']
         ];
 
         $this->reflection = new ReflectionClass(DatabaseService::class);

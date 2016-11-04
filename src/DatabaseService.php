@@ -12,8 +12,12 @@ class DatabaseService implements Contracts\StoreInterface
 {
     public $connection;
 
+    public $params = [];
+
     public function __construct(array $params)
     {
+        $this->params = $params;
+
         if (! $this->connection) {
             $username = $password = null;
             $options = [];
