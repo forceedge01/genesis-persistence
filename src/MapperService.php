@@ -36,6 +36,9 @@ class MapperService implements Contracts\MapperInterface
         $query = rtrim($query, ', ');
         $query .= ')';
 
+        echo PHP_EOL;
+        echo $query;
+
         return $this->databaseService->execute($query);
     }
 
@@ -173,7 +176,7 @@ class MapperService implements Contracts\MapperInterface
         return array_keys($reflection->getDefaultProperties());
     }
 
-    private function getPropertiesWithTypesFromClass($class)
+    public function getPropertiesWithTypesFromClass($class)
     {
         $reflection = new ReflectionClass($class);
 

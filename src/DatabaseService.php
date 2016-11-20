@@ -87,7 +87,7 @@ class DatabaseService implements Contracts\StoreInterface
     {
         $whereClause = $this->getWhereClauseFromArray($where);
         $orderClause = $this->getOrderClause($order);
-        $query =  "SELECT * FROM `$table` WHERE $whereClause $orderClause";
+        $query =  "SELECT * FROM `$table` $whereClause $orderClause";
 
         return $this->execute($query);
     }
@@ -106,7 +106,7 @@ class DatabaseService implements Contracts\StoreInterface
         $orderBy = '';
 
         if ($where) {
-            $whereClause = 'WHERE ' . $this->getWhereClauseFromArray($where);
+            $whereClause = $this->getWhereClauseFromArray($where);
         }
 
         if ($order) {
@@ -123,20 +123,12 @@ class DatabaseService implements Contracts\StoreInterface
         return false;
     }
 
-    private function getOrderClause(array $order)
-    {
-        $column = key($order);
-        $value = current($order);
-
-        return "ORDER BY `$column` $value";
-    }
-
     public function delete($table, array $where = [])
     {
         $whereClause = '';
 
         if ($where) {
-            $whereClause = 'WHERE ' . $this->getWhereClauseFromArray($where);
+            $whereClause = $this->getWhereClauseFromArray($where);
         }
 
         $query =  "DELETE FROM `$table` $whereClause";
@@ -150,7 +142,7 @@ class DatabaseService implements Contracts\StoreInterface
         $updateClause = $this->getUpdateClauseFromArray($update);
 
         if ($where) {
-            $whereClause = 'WHERE ' . $this->getWhereClauseFromArray($where);
+            $whereClause = $this->getWhereClauseFromArray($where);
         }
 
         $query = "UPDATE $table SET $updateClause $whereClause";
@@ -159,21 +151,15 @@ class DatabaseService implements Contracts\StoreInterface
         return $this;
     }
 
-    private function checkForErrors($query)
+    public function getOrderClause(array $order)
     {
-        if ($this->connection->errorCode() !== '00000') {
-            $prex = function () { echo '<pre>'; $args = func_get_args(); foreach ($args as $key => $arg) {
-     var_dump($arg);
-     echo PHP_EOL . '===============================' . PHP_EOL . PHP_EOL;
- } echo 'Debug backtrace ' . PHP_EOL; print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5)); echo 'Output from: ' . __FILE__ . ', Line: ' . __LINE__; exit; };
-            $prex(
-                $this->connection->errorInfo(), $query
-                // ,get_class($this), get_class_methods($this)
-            );
-        }
+        $column = key($order);
+        $value = current($order);
+
+        return "ORDER BY `$column` $value";
     }
 
-    private function getWhereClauseFromArray(array $whereArray)
+    public function getWhereClauseFromArray(array $whereArray)
     {
         $where = '';
 
@@ -184,10 +170,10 @@ class DatabaseService implements Contracts\StoreInterface
 
         $where = rtrim($where, 'AND ');
 
-        return $where;
+        return 'WHERE ' . $where;
     }
 
-    private function getUpdateClauseFromArray(array $updateArray)
+    public function getUpdateClauseFromArray(array $updateArray)
     {
         $update = '';
 
@@ -201,20 +187,7 @@ class DatabaseService implements Contracts\StoreInterface
         return $update;
     }
 
-    private function quoteValue($value)
-    {
-        $excludePattern = '/^(null)|(count\(.+\))|(sum\(.+\))|date\(.+\)|now\(\)$/';
-
-        if ((is_numeric($value) || preg_match($excludePattern, strtolower($value)))) {
-            $value = $value;
-        } else {
-            $value = '\'' . str_replace("'", "''", $value) . '\'';
-        }
-
-        return $value;
-    }
-
-    private function getValuesClauseFromArray(array $values)
+    public function getValuesClauseFromArray(array $values)
     {
         $columns = '(';
         $columnValues = '(';
@@ -232,5 +205,32 @@ class DatabaseService implements Contracts\StoreInterface
         $columnValues .= ')';
 
         return [$columns, $columnValues];
+    }
+
+    private function checkForErrors($query)
+    {
+        if ($this->connection->errorCode() !== '00000') {
+            $prex = function () { echo '<pre>'; $args = func_get_args(); foreach ($args as $key => $arg) {
+     var_dump($arg);
+     echo PHP_EOL . '===============================' . PHP_EOL . PHP_EOL;
+ } echo 'Debug backtrace ' . PHP_EOL; print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5)); echo 'Output from: ' . __FILE__ . ', Line: ' . __LINE__; exit; };
+            $prex(
+                $this->connection->errorInfo(), $query
+                // ,get_class($this), get_class_methods($this)
+            );
+        }
+    }
+
+    private function quoteValue($value)
+    {
+        $excludePattern = '/^(null)|(count\(.+\))|(sum\(.+\))|date\(.+\)|now\(\)$/';
+
+        if ((is_numeric($value) || preg_match($excludePattern, strtolower($value)))) {
+            $value = $value;
+        } else {
+            $value = '\'' . str_replace("'", "''", $value) . '\'';
+        }
+
+        return $value;
     }
 }
