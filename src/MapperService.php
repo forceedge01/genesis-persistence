@@ -103,6 +103,20 @@ class MapperService implements Contracts\MapperInterface
         return false;
     }
 
+    /**
+     * @param string $class The class to fetch the count for.
+     * @param array $args The criteria.
+     *
+     * @return int
+     */
+    public function getCount($class, array $args)
+    {
+        $table = $this->getTableFromClass($class);
+        $data = $this->databaseService->getCount($table, $args);
+
+        return $data[0]["{$table}Count"];
+    }
+
     public function getAssociated($associatedClass, Contracts\ModelInterface $fromObject)
     {
         // Check if the associated class has a property on the fromObject.

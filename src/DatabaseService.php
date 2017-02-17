@@ -100,6 +100,14 @@ class DatabaseService implements Contracts\StoreInterface
         return $this->execute($query);
     }
 
+    public function getCount($table, array $where)
+    {
+        $whereClause = $this->getWhereClauseFromArray($where);
+        $query = "SELECT count(id) AS {$table}Count FROM `$table` $whereClause";
+
+        return $this->execute($query);
+    }
+
     public function getSingle($table, array $where = [], array $order = ['id' => 'asc'])
     {
         $whereClause = '';
