@@ -36,5 +36,63 @@ class DatabaseServiceTest extends PHPUnit_Framework_TestCase
         $this->testObject = $this->reflection->newInstanceArgs($this->dependencies);
     }
 
-    //tmethod
+    public function testSave()
+    {
+        $this->markTestIncomplete('Needs implementing');
+    }
+
+    public function testExecute()
+    {
+        $this->markTestIncomplete('Needs implementing');
+    }
+
+    public function testGet()
+    {
+        $this->markTestIncomplete('Needs implementing');
+    }
+
+    public function testGetAll()
+    {
+        $this->markTestIncomplete('Needs implementing');
+    }
+
+    public function testGetCount()
+    {
+        $this->markTestIncomplete('Needs implementing');
+    }
+
+    public function testGetSingle()
+    {
+        $this->markTestIncomplete('Needs implementing');
+    }
+
+    public function testDelete()
+    {
+        $this->markTestIncomplete('Needs implementing');
+    }
+
+    public function testUpdate()
+    {
+        $this->markTestIncomplete('Needs implementing');
+    }
+
+    public function testGetOrderClause()
+    {
+        $this->markTestIncomplete('Needs implementing');
+    }
+
+    public function testGetWhereClauseFromArray()
+    {
+        $this->markTestIncomplete('Needs implementing');
+    }
+
+    public function testGetUpdateClauseFromArray()
+    {
+        $this->markTestIncomplete('Needs implementing');
+    }
+
+    public function testGetValuesClauseFromArray()
+    {
+        $this->markTestIncomplete('Needs implementing');
+    }
 }

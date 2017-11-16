@@ -2,8 +2,8 @@
 
 namespace Genesis\Services\Persistence;
 
-use PDO;
 use Exception;
+use PDO;
 
 /**
  * DatabaseService class.
@@ -35,32 +35,6 @@ class DatabaseService implements Contracts\StoreInterface
             }
 
             $this->connection = new PDO($this->getConnectionString($params), $username, $password, $options);
-        }
-    }
-
-    private function getConnectionString(array $params)
-    {
-        if (! isset($params['dbengine'])) {
-            throw new Exception('The database engine must be specified.');
-        }
-
-        switch ($params['dbengine']) {
-            case 'sqlite':
-                return "sqlite:{$params['path']}";
-            case 'mysql':
-                if (!isset($params['port'])) {
-                    $params['port'] = 3306;
-                }
-
-                return "mysql:dbname={$params['dbname']};host={$params['host']};port={$params['port']}";
-            case 'pgsql':
-                if (!isset($params['port'])) {
-                    $params['port'] = 5432;
-                }
-
-                return "pgsql:dbname={$params['dbname']};host={$params['host']};port={$params['port']};sslmode={$params['sslmode']}";
-            default:
-                throw new Exception("Database {$params['dbengine']} is not supported at the moment.");
         }
     }
 
@@ -215,13 +189,47 @@ class DatabaseService implements Contracts\StoreInterface
         return [$columns, $columnValues];
     }
 
+    private function getConnectionString(array $params)
+    {
+        if (! isset($params['dbengine'])) {
+            throw new Exception('The database engine must be specified.');
+        }
+
+        switch ($params['dbengine']) {
+            case 'sqlite':
+                return "sqlite:{$params['path']}";
+            case 'mysql':
+                if (! isset($params['port'])) {
+                    $params['port'] = 3306;
+                }
+
+                return "mysql:dbname={$params['dbname']};host={$params['host']};port={$params['port']}";
+            case 'pgsql':
+                if (! isset($params['port'])) {
+                    $params['port'] = 5432;
+                }
+
+                return "pgsql:dbname={$params['dbname']};host={$params['host']};port={$params['port']};sslmode={$params['sslmode']}";
+            default:
+                throw new Exception("Database {$params['dbengine']} is not supported at the moment.");
+        }
+    }
+
     private function checkForErrors($query)
     {
         if ($this->connection->errorCode() !== '00000') {
-            $prex = function () { echo '<pre>'; $args = func_get_args(); foreach ($args as $key => $arg) {
-     var_dump($arg);
-     echo PHP_EOL . '===============================' . PHP_EOL . PHP_EOL;
- } echo 'Debug backtrace ' . PHP_EOL; print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5)); echo 'Output from: ' . __FILE__ . ', Line: ' . __LINE__; exit; };
+            $prex = function () {
+                echo '<pre>';
+                $args = func_get_args();
+                foreach ($args as $key => $arg) {
+                    var_dump($arg);
+                    echo PHP_EOL . '===============================' . PHP_EOL . PHP_EOL;
+                }
+                echo 'Debug backtrace ' . PHP_EOL;
+                print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5));
+                echo 'Output from: ' . __FILE__ . ', Line: ' . __LINE__;
+                exit;
+            };
             $prex(
                 $this->connection->errorInfo(), $query
                 // ,get_class($this), get_class_methods($this)
