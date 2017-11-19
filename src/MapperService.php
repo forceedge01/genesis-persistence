@@ -17,11 +17,19 @@ class MapperService implements Contracts\MapperInterface
         $this->databaseService = $databaseService;
     }
 
+    /**
+     * @return Contracts\StoreInterface
+     */
     public function getDatabaseService()
     {
         return $this->databaseService;
     }
 
+    /**
+     * @param string $class The class name.
+     *
+     * @return array
+     */
     public function createTable($class)
     {
         $table = $this->getTableFromClass($class);
@@ -43,11 +51,11 @@ class MapperService implements Contracts\MapperInterface
     }
 
     /**
-     * set.
+     * Persists data to the chosen storage mechanism.
      *
-     * @param string $key [description]
+     * @param Contracts\ModelInterface $object The model object.
      *
-     * @return $this
+     * @return Contracts\ModelInterface
      */
     public function persist(Contracts\ModelInterface $object)
     {
@@ -58,7 +66,7 @@ class MapperService implements Contracts\MapperInterface
         $table = $this->getTableFromClass($class);
         $values = $this->getPropertiesValue($object, $properties);
 
-        if (!empty($values['id'])) {
+        if (! empty($values['id'])) {
             return $this->databaseService->update($table, $values, ['id' => $values['id']]);
         }
 
@@ -72,7 +80,14 @@ class MapperService implements Contracts\MapperInterface
         return $object;
     }
 
-    public function get($class, array $args = [], array $order = ['id' => 'asc'])
+    /**
+     * @param string $class The class name.
+     * @param array $where The criteria.
+     * @param array $order The order of the results retrieved.
+     *
+     * @return Contracts\ModelInterface[]
+     */
+    public function get($class, array $where = [], array $order = ['id' => 'asc'])
     {
         if (! in_array(Contracts\ModelInterface::class, class_implements($class))) {
             throw new Exception("Invalid class given: '$class', must implement BaseModel!");
@@ -80,8 +95,8 @@ class MapperService implements Contracts\MapperInterface
 
         $table = $this->getTableFromClass($class);
 
-        if ($args) {
-            $data = $this->databaseService->get($table, $args, $order);
+        if ($where) {
+            $data = $this->databaseService->get($table, $where, $order);
         } else {
             $data = $this->databaseService->getAll($table, $order);
         }
@@ -89,10 +104,15 @@ class MapperService implements Contracts\MapperInterface
         return $this->bindToModel($class, $data);
     }
 
-    public function getSingle($class, array $args = [], array $order = ['id' => 'asc'])
+    /**
+     * @param string $class The class name.
+     *
+     * @return Contracts\ModelInterface|false
+     */
+    public function getSingle($class, array $where = [], array $order = ['id' => 'asc'])
     {
         $table = $this->getTableFromClass($class);
-        $data = $this->databaseService->getSingle($table, $args, $order);
+        $data = $this->databaseService->getSingle($table, $where, $order);
 
         if ($data) {
             $collection = $this->bindToModel($class, [$data]);
@@ -105,18 +125,24 @@ class MapperService implements Contracts\MapperInterface
 
     /**
      * @param string $class The class to fetch the count for.
-     * @param array $args The criteria.
+     * @param array $where The criteria.
      *
      * @return int
      */
-    public function getCount($class, array $args)
+    public function getCount($class, array $where)
     {
         $table = $this->getTableFromClass($class);
-        $data = $this->databaseService->getCount($table, $args);
+        $data = $this->databaseService->getCount($table, $where);
 
         return $data[0]["{$table}Count"];
     }
 
+    /**
+     * @param string $associatedClass The associated class.
+     * @param Contracts\ModelInterface $fromObject The association object.
+     *
+     * @return Contracts\ModelInterface|false
+     */
     public function getAssociated($associatedClass, Contracts\ModelInterface $fromObject)
     {
         // Check if the associated class has a property on the fromObject.
@@ -140,6 +166,12 @@ class MapperService implements Contracts\MapperInterface
         );
     }
 
+    /**
+     * @param string $class The class name.
+     * @param array $where The criteria.
+     *
+     * @return Contracts\StoreInterface
+     */
     public function delete($class, array $where = [])
     {
         if (is_object($class)) {
@@ -159,6 +191,11 @@ class MapperService implements Contracts\MapperInterface
         return $this->databaseService->delete($table, $where);
     }
 
+    /**
+     * @param string $class The class name.
+     *
+     * @return string
+     */
     public function getTableFromClass($class)
     {
         $chunks = explode('\\', $class);
@@ -166,6 +203,12 @@ class MapperService implements Contracts\MapperInterface
         return end($chunks);
     }
 
+    /**
+     * @param string $class The class name.
+     * @param array $data The data to bind.
+     *
+     * @return Contracts\ModelInterface[]
+     */
     public function bindToModel($class, array $data)
     {
         if (! $data) {
@@ -183,18 +226,32 @@ class MapperService implements Contracts\MapperInterface
         return $collection;
     }
 
-    private function getPropertiesFromClass($class)
-    {
-        $reflection = new ReflectionClass($class);
-
-        return array_keys($reflection->getDefaultProperties());
-    }
-
+    /**
+     * Get all default values for a class.
+     *
+     * @param string $class The class.
+     *
+     * @return array
+     */
     public function getPropertiesWithTypesFromClass($class)
     {
         $reflection = new ReflectionClass($class);
 
         return $reflection->getDefaultProperties();
+    }
+
+    /**
+     * Get all properties from a class.
+     *
+     * @param string $class The class.
+     *
+     * @return array
+     */
+    private function getPropertiesFromClass($class)
+    {
+        $reflection = new ReflectionClass($class);
+
+        return array_keys($reflection->getDefaultProperties());
     }
 
     private function getPropertiesValue(Contracts\ModelInterface $object, array $properties)

@@ -44,6 +44,20 @@ class BaseModelTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Check that a new object can be instantiated from a modal class.
+     */
+    public function testGetNew()
+    {
+        $newObject = BaseModelTester::getNew();
+
+        // Assert that the object created is equal in terms of data initialisation but not the same.
+        $this->assertNotSame($this->testObject, $newObject);
+        $this->assertEquals($this->testObject, $newObject);
+        $this->assertEquals(0, $newObject->getUserId());
+        $this->assertEquals('', $newObject->getName());
+    }
+
+    /**
      * test Test that Construct executes as expected.
      */
     public function testConstructSetsDefaultValuesAndAccessibleByMagicGetters()
