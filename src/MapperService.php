@@ -11,6 +11,7 @@ use ReflectionClass;
 class MapperService implements Contracts\MapperInterface
 {
     private $databaseService;
+    private static $reflections = [];
 
     public function __construct(Contracts\StoreInterface $databaseService)
     {
@@ -60,8 +61,7 @@ class MapperService implements Contracts\MapperInterface
     public function persist(Contracts\ModelInterface $object)
     {
         $class = get_class($object);
-
-        $properties = $this->getPropertiesFromClass($object);
+        $properties = $this->getPropertiesFromClass($class);
 
         $table = $this->getTableFromClass($class);
         $values = $this->getPropertiesValue($object, $properties);
@@ -211,6 +211,10 @@ class MapperService implements Contracts\MapperInterface
      */
     public function bindToModel($class, array $data)
     {
+        if (! in_array(Contracts\ModelInterface::class, class_implements($class))) {
+            throw new Exception("Class '$class' does not implmenet interface " . Contracts\ModelInterface::class);
+        }
+
         if (! $data) {
             return [];
         }
@@ -218,7 +222,7 @@ class MapperService implements Contracts\MapperInterface
         $collection = [];
 
         foreach ($data as $record) {
-            $object = new $class();
+            $object = $class::getNew();
             $this->setObjectPropertyValues($object, $record);
             $collection[] = $object;
         }
@@ -235,9 +239,7 @@ class MapperService implements Contracts\MapperInterface
      */
     public function getPropertiesWithTypesFromClass($class)
     {
-        $reflection = new ReflectionClass($class);
-
-        return $reflection->getDefaultProperties();
+        return $this->getReflection($class)->getDefaultProperties();
     }
 
     /**
@@ -249,9 +251,7 @@ class MapperService implements Contracts\MapperInterface
      */
     private function getPropertiesFromClass($class)
     {
-        $reflection = new ReflectionClass($class);
-
-        return array_keys($reflection->getDefaultProperties());
+        return array_keys($this->getReflection($class)->getDefaultProperties());
     }
 
     private function getPropertiesValue(Contracts\ModelInterface $object, array $properties)
@@ -263,6 +263,15 @@ class MapperService implements Contracts\MapperInterface
         }
 
         return $values;
+    }
+
+    private function getReflection($class)
+    {
+        if (! isset(self::$reflections[$class])) {
+            self::$reflections[$class] = new ReflectionClass($class);
+        }
+
+        return self::$reflections[$class];
     }
 
     private function setObjectPropertyValues(Contracts\ModelInterface $object, array $properties)

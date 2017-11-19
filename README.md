@@ -106,29 +106,18 @@ class App
     {
         $mapperService = ...
 
-        // If say a form is submitted.
-        if ($form->isSubmitted()) {
-            // Create a new model object for insertion.
-            $mySpecificItemModel = new MyItemModel();
-            $mySpecificItemModel
-                ->setName('whatever you want.')
-                ->setDescription('A great description');
+        // Create a new model object for insertion.
+        $myModel = MyItemModel::getNew();
+        $myModel
+            ->setName('whatever you want.')
+            ->setDescription('A great description');
 
-            // Insert new record in the database.
-            $mapperService->persist($mySpecificItemModel);
+        // Insert new record in the database.
+        $mapperService->persist($myModel);
 
-            if ($mySpecificItemModel->getId()) {
-                $this->message('Record saved successfully.');
-            } else {
-                $this->message('Failed saving record.');
-            }
+        if ($myModel->getId()) {
+            $this->message('Record saved successfully.');
         }
-
-        // Get all MyItemModels back.
-        $myItemModels = $mapperService->get(MyItemModel::class);
-
-        // Use the retrieved models somehow.
-        ...
     }
 
     /**
@@ -137,21 +126,18 @@ class App
     public function update()
     {
         $mapperService = ...
+        
+        // Get a specific record from the database mapped to your model object.
+        $myModel = $mapperService->getSingle(MyItemModel::class, ['id' => $form->get('item_id')]);
 
-        // If say a form is submitted.
-        if ($form->isSubmitted()) {
-            // Get a specific record from the database mapped to your model object.
-            $mySpecificItemModel = $mapperService->getSingle(MyItemModel::class, ['id' => $form->get('item_id')]);
+        // Update model with desired data. Note the setters/getters are provided out of the box by just
+        // extending the baseModel which are based on the properties your model has.
+        $myModel
+            ->setName('whatever you want.')
+            ->setDescription('A great description');
 
-            // Update model with desired data. Note the setters/getters are provided out of the box by just
-            // extending the baseModel which are based on the properties your model has.
-            $mySpecificItemModel
-                ->setName('whatever you want.')
-                ->setDescription('A great description');
-
-            // Update the record in the database.
-            $mapperService->persist($mySpecificItemModel);
-        }
+        // Update the record in the database.
+        $mapperService->persist($myModel);
 
         // Get all MyItemModels back with the name `howdy`, order them by the id descending.
         $myItemModels = $mapperService->get(MyItemModel::class, ['name' => 'howdy'], ['id' => 'desc']);
