@@ -14,6 +14,18 @@ class DatabaseService implements Contracts\StoreInterface
 
     public $params = [];
 
+    /**
+     * @param array $param The database connection details.
+     *
+     * @example [
+     * 'username' => 'root',
+     * 'password' => '',
+     * 'options' => [],
+     * 'dbengine' => 'sqlite',
+     * 'port' => '',
+     * 'path' => ''
+     * ]
+     */
     public function __construct(array $params)
     {
         $this->params = $params;

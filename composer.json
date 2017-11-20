@@ -17,5 +17,9 @@
         "psr-4": {
             "Genesis\\Services\\Persistence\\": "src/"
         }
-    }
+    },
+    "bin": [
+        "bin/db-migrate.php",
+        "bin/db-setup.php"
+    ]
 }
