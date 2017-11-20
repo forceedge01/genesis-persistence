@@ -253,7 +253,7 @@ Console
 
 This packages comes with 2 console scripts
 
-1. db-setup.php <model-directory> # Setup your database based on your model class definitions.
-2. db-migrate.php <model-directory> # Any changes you've made to the model class definitions will be detected.
+1. db-setup.php {model-directory} # Setup your database based on your model class definitions.
+2. db-migrate.php {model-directory} # Any changes you've made to the model class definitions will be detected.
 
 Find these in the bin folder.
