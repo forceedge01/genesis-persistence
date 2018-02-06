@@ -14,14 +14,9 @@ class MapperModelTester extends BaseModel
 
     protected $name = 'text not null';
 
-    protected function getRequiredData()
+    protected function getRequiredFields()
     {
         return ['userId'];
-    }
-
-    protected function getOptionalData()
-    {
-        return ['name'];
     }
 }
 
@@ -31,25 +26,15 @@ class MapperModelTester2
 
     protected $name = 'text not null';
 
-    protected function getRequiredData()
+    protected function getRequiredFields()
     {
         return ['userId'];
-    }
-
-    protected function getOptionalData()
-    {
-        return ['name'];
     }
 }
 
 class User extends BaseModel
 {
-    protected function getRequiredData()
-    {
-        return [];
-    }
-
-    protected function getOptionalData()
+    protected function getRequiredFields()
     {
         return [];
     }

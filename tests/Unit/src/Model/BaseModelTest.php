@@ -2,6 +2,7 @@
 
 namespace Genesis\Services\Test\Persistence\Model;
 
+use DateTime;
 use Genesis\Services\Persistence\Model\BaseModel;
 use PHPUnit_Framework_TestCase;
 use ReflectionClass;
@@ -12,14 +13,11 @@ class BaseModelTester extends BaseModel
 
     protected $name = 'text not null';
 
-    protected function getRequiredData()
+    protected $createdDate = 'text not null';
+
+    protected function getRequiredFields()
     {
         return ['userId'];
-    }
-
-    protected function getOptionalData()
-    {
-        return ['name'];
     }
 }
 
@@ -55,12 +53,14 @@ class BaseModelTest extends PHPUnit_Framework_TestCase
     {
         $newObject = BaseModelTester::getNew([
             'userId' => 5, // Required field
-            'name' => 'Abdul' // Optional field
+            'name' => 'Abdul', // Optional field,
+            'createdDate' => '2018-02-01'
         ]);
 
         $this->assertNotSame($this->testObject, $newObject);
         $this->assertEquals(5, $newObject->getUserId());
         $this->assertEquals('Abdul', $newObject->getName());
+        $this->assertEquals(new DateTime('2018-02-01'), $newObject->getCreatedDate());
     }
 
     /**
@@ -72,6 +72,7 @@ class BaseModelTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(0, $this->testObject->getId());
         $this->assertEquals(57, $this->testObject->getUserId());
         $this->assertEquals('', $this->testObject->getName());
+        $this->assertEquals(null, $this->testObject->getCreatedDate());
     }
 
     /**

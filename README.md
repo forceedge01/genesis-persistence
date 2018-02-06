@@ -26,6 +26,18 @@ class MyItemModel extends BaseModel
     protected $description = 'text default null';
 
     protected $userId = 'integer not null';
+
+    /**
+     * Enforced by the constructor.
+     *
+     * @return array
+     */
+    protected function getRequiredFields()
+    {
+        return [
+            'userId'
+        ];
+    }
 }
 
 ```
@@ -107,8 +119,7 @@ class App
         $mapperService = ...
 
         // Create a new model object for insertion.
-        $myModel = MyItemModel::getNew();
-        $myModel
+        $myModel = MyItemModel::getNew(['userId' => 33432])
             ->setName('whatever you want.')
             ->setDescription('A great description');
 
