@@ -45,12 +45,7 @@ class BaseModelTest extends PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $this->dependencies = [
-            'data' => ['userId' => 57], //nmock
-        ];
-
-        $this->reflection = new ReflectionClass(BaseModelTester::class);
-        $this->testObject = $this->reflection->newInstanceArgs($this->dependencies);
+        $this->testObject = BaseModelTester::getNew(['userId' => 57]);
     }
 
     /**

@@ -222,7 +222,7 @@ class MapperService implements Contracts\MapperInterface
         $collection = [];
 
         foreach ($data as $record) {
-            $object = $class::getNew();
+            $object = $class::getNew($record);
             $this->setObjectPropertyValues($object, $record);
             $collection[] = $object;
         }

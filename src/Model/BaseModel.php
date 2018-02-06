@@ -33,7 +33,7 @@ abstract class BaseModel implements ModelInterface
      *
      * @param array|[] $data
      */
-    public function __construct(array $data = [])
+    private function __construct(array $data = [])
     {
         $this->class = get_called_class();
         $properties = get_class_vars(get_called_class());
@@ -126,6 +126,7 @@ abstract class BaseModel implements ModelInterface
     protected function setOptionalData(array $data)
     {
         $indexes = $this->getOptionalData();
+        $indexes[] = 'id';
 
         foreach ($indexes as $index) {
             if (isset($data[$index])) {

@@ -111,7 +111,9 @@ class MapperServiceTest extends PHPUnit_Framework_TestCase
     public function testCreateTableWithClassObject()
     {
         // Prepare / Mock
-        $obj = new MapperModelTester();
+        $obj = MapperModelTester::getNew([
+            'userId' => null
+        ]);
 
         $this->dependencies['databaseService']->expects($this->once())
             ->method('execute')
@@ -131,7 +133,7 @@ class MapperServiceTest extends PHPUnit_Framework_TestCase
     public function testPersistCreatesNew()
     {
         // Prepare / Mock
-        $obj = new MapperModelTester();
+        $obj = MapperModelTester::getNew(['userId' => 15]);
         $obj->setName('Abdul');
         $obj->setUserId(1555);
 
@@ -156,7 +158,7 @@ class MapperServiceTest extends PHPUnit_Framework_TestCase
     public function testPersistUpdatesExisting()
     {
         // Prepare / Mock
-        $obj = new MapperModelTester();
+        $obj = MapperModelTester::getNew(['userId' => 15]);
         $obj->setName('Abdul');
         $obj->setUserId(1555);
         $obj->setId(23);
@@ -263,7 +265,7 @@ class MapperServiceTest extends PHPUnit_Framework_TestCase
     {
         // Prepare / Mock
         $validModel = MapperModelTester::class;
-        $expectedObject = new MapperModelTester();
+        $expectedObject = MapperModelTester::getNew(['userId' => 15]);
         $expectedObject
             ->setId(34)
             ->setName('Abdul')
@@ -289,7 +291,7 @@ class MapperServiceTest extends PHPUnit_Framework_TestCase
     public function testThrowExceptionIfNoAssociation()
     {
         // Prepare / Mock
-        $fromObject = new MapperModelTester();
+        $fromObject = MapperModelTester::getNew(['userId' => 15]);
 
         // Execute
         $this->testObject->getAssociated(Product::class, $fromObject);
@@ -302,7 +304,7 @@ class MapperServiceTest extends PHPUnit_Framework_TestCase
     {
         // Prepare / Mock
         $userId = 8827;
-        $fromObject = new MapperModelTester();
+        $fromObject = MapperModelTester::getNew(['userId' => 15]);
         $fromObject->setUserId($userId);
 
         $this->dependencies['databaseService']->expects($this->once())
@@ -343,7 +345,7 @@ class MapperServiceTest extends PHPUnit_Framework_TestCase
     public function testDeleteWithObjectNoId()
     {
         // Prepare / Mock
-        $model = new MapperModelTester();
+        $model = MapperModelTester::getNew(['userId' => 5]);
 
         $this->dependencies['databaseService']->expects($this->never())
             ->method('delete');
@@ -358,7 +360,7 @@ class MapperServiceTest extends PHPUnit_Framework_TestCase
     public function testDeleteWithObject()
     {
         // Prepare / Mock
-        $model = new MapperModelTester();
+        $model = MapperModelTester::getNew(['userId' => 34]);
         $model->setId(45);
 
         $this->dependencies['databaseService']->expects($this->once())
@@ -424,7 +426,7 @@ class MapperServiceTest extends PHPUnit_Framework_TestCase
         // Prepare / Mock
         $class = MapperModelTester::class;
         $data = [['id' => 45, 'name' => 'abdul', 'userId' => 47]];
-        $expectedObject = new MapperModelTester(['userId' => null]);
+        $expectedObject = MapperModelTester::getNew(['userId' => null]);
         $expectedObject->setId(45)
             ->setName('abdul')
             ->setUserId(47);
