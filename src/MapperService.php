@@ -223,7 +223,6 @@ class MapperService implements Contracts\MapperInterface
 
         foreach ($data as $record) {
             $object = $class::getNew($record);
-            $this->setObjectPropertyValues($object, $record);
             $collection[] = $object;
         }
 
@@ -272,15 +271,5 @@ class MapperService implements Contracts\MapperInterface
         }
 
         return self::$reflections[$class];
-    }
-
-    private function setObjectPropertyValues(Contracts\ModelInterface $object, array $properties)
-    {
-        foreach ($properties as $property => $value) {
-            $call = 'set' . ucfirst($property);
-            $object->$call($value);
-        }
-
-        return $object;
     }
 }
