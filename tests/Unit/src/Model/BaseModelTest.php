@@ -2,6 +2,7 @@
 
 namespace Genesis\Services\Test\Persistence\Model;
 
+use DateTime;
 use Genesis\Services\Persistence\Model\BaseModel;
 use PHPUnit_Framework_TestCase;
 use ReflectionClass;
@@ -11,6 +12,13 @@ class BaseModelTester extends BaseModel
     protected $userId = 'int not null';
 
     protected $name = 'text not null';
+
+    protected $createdDate = 'text not null';
+
+    protected function getRequiredFields()
+    {
+        return ['userId'];
+    }
 }
 
 class BaseModelTest extends PHPUnit_Framework_TestCase
@@ -35,12 +43,7 @@ class BaseModelTest extends PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $this->dependencies = [
-            'Name of dependency' => null, //nmock
-        ];
-
-        $this->reflection = new ReflectionClass(BaseModelTester::class);
-        $this->testObject = $this->reflection->newInstanceArgs($this->dependencies);
+        $this->testObject = BaseModelTester::getNew(['userId' => 57]);
     }
 
     /**
@@ -48,13 +51,16 @@ class BaseModelTest extends PHPUnit_Framework_TestCase
      */
     public function testGetNew()
     {
-        $newObject = BaseModelTester::getNew();
+        $newObject = BaseModelTester::getNew([
+            'userId' => 5, // Required field
+            'name' => 'Abdul', // Optional field,
+            'createdDate' => '2018-02-01'
+        ]);
 
-        // Assert that the object created is equal in terms of data initialisation but not the same.
         $this->assertNotSame($this->testObject, $newObject);
-        $this->assertEquals($this->testObject, $newObject);
-        $this->assertEquals(0, $newObject->getUserId());
-        $this->assertEquals('', $newObject->getName());
+        $this->assertEquals(5, $newObject->getUserId());
+        $this->assertEquals('Abdul', $newObject->getName());
+        $this->assertEquals(new DateTime('2018-02-01'), $newObject->getCreatedDate());
     }
 
     /**
@@ -64,8 +70,9 @@ class BaseModelTest extends PHPUnit_Framework_TestCase
     {
         // Assert Result
         $this->assertEquals(0, $this->testObject->getId());
-        $this->assertEquals(0, $this->testObject->getUserId());
+        $this->assertEquals(57, $this->testObject->getUserId());
         $this->assertEquals('', $this->testObject->getName());
+        $this->assertEquals(null, $this->testObject->getCreatedDate());
     }
 
     /**
@@ -126,5 +133,16 @@ class BaseModelTest extends PHPUnit_Framework_TestCase
     {
         // Execute
         $this->testObject->name();
+    }
+
+    /**
+     * testMagicGettersAndSetters Test that MagicGettersAndSetters executes as expected.
+     *
+     * @expectedException Exception
+     */
+    public function testMagicGetterThrowExceptionNotDefinedPropertySet()
+    {
+        // Execute
+        $this->testObject->colour = 'blue';
     }
 }
