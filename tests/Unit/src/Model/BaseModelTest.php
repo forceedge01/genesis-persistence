@@ -11,6 +11,16 @@ class BaseModelTester extends BaseModel
     protected $userId = 'int not null';
 
     protected $name = 'text not null';
+
+    protected function getRequiredData()
+    {
+        return ['userId'];
+    }
+
+    protected function getOptionalData()
+    {
+        return ['name'];
+    }
 }
 
 class BaseModelTest extends PHPUnit_Framework_TestCase
@@ -36,7 +46,7 @@ class BaseModelTest extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->dependencies = [
-            'Name of dependency' => null, //nmock
+            'data' => ['userId' => 57], //nmock
         ];
 
         $this->reflection = new ReflectionClass(BaseModelTester::class);
@@ -48,13 +58,14 @@ class BaseModelTest extends PHPUnit_Framework_TestCase
      */
     public function testGetNew()
     {
-        $newObject = BaseModelTester::getNew();
+        $newObject = BaseModelTester::getNew([
+            'userId' => 5, // Required field
+            'name' => 'Abdul' // Optional field
+        ]);
 
-        // Assert that the object created is equal in terms of data initialisation but not the same.
         $this->assertNotSame($this->testObject, $newObject);
-        $this->assertEquals($this->testObject, $newObject);
-        $this->assertEquals(0, $newObject->getUserId());
-        $this->assertEquals('', $newObject->getName());
+        $this->assertEquals(5, $newObject->getUserId());
+        $this->assertEquals('Abdul', $newObject->getName());
     }
 
     /**
@@ -64,7 +75,7 @@ class BaseModelTest extends PHPUnit_Framework_TestCase
     {
         // Assert Result
         $this->assertEquals(0, $this->testObject->getId());
-        $this->assertEquals(0, $this->testObject->getUserId());
+        $this->assertEquals(57, $this->testObject->getUserId());
         $this->assertEquals('', $this->testObject->getName());
     }
 
@@ -126,5 +137,16 @@ class BaseModelTest extends PHPUnit_Framework_TestCase
     {
         // Execute
         $this->testObject->name();
+    }
+
+    /**
+     * testMagicGettersAndSetters Test that MagicGettersAndSetters executes as expected.
+     *
+     * @expectedException Exception
+     */
+    public function testMagicGetterThrowExceptionNotDefinedPropertySet()
+    {
+        // Execute
+        $this->testObject->colour = 'blue';
     }
 }

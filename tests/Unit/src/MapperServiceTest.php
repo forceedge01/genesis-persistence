@@ -13,6 +13,16 @@ class MapperModelTester extends BaseModel
     protected $userId = 'int not null';
 
     protected $name = 'text not null';
+
+    protected function getRequiredData()
+    {
+        return ['userId'];
+    }
+
+    protected function getOptionalData()
+    {
+        return ['name'];
+    }
 }
 
 class MapperModelTester2
@@ -20,10 +30,29 @@ class MapperModelTester2
     protected $userId = 'int not null';
 
     protected $name = 'text not null';
+
+    protected function getRequiredData()
+    {
+        return ['userId'];
+    }
+
+    protected function getOptionalData()
+    {
+        return ['name'];
+    }
 }
 
 class User extends BaseModel
 {
+    protected function getRequiredData()
+    {
+        return [];
+    }
+
+    protected function getOptionalData()
+    {
+        return [];
+    }
 }
 
 class MapperServiceTest extends PHPUnit_Framework_TestCase
@@ -395,7 +424,7 @@ class MapperServiceTest extends PHPUnit_Framework_TestCase
         // Prepare / Mock
         $class = MapperModelTester::class;
         $data = [['id' => 45, 'name' => 'abdul', 'userId' => 47]];
-        $expectedObject = new MapperModelTester();
+        $expectedObject = new MapperModelTester(['userId' => null]);
         $expectedObject->setId(45)
             ->setName('abdul')
             ->setUserId(47);
