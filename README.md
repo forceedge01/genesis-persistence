@@ -21,18 +21,14 @@ use Genesis\Services\Persistence\Model\BaseModel;
 
 class MyItemModel extends BaseModel
 {
-    protected $name = 'text not null unique';
+    public static $table = 'my_item_model'; // If not declared inferred from class name.
 
-    protected $description = 'text default null';
-
-    protected $userId = 'integer not null';
+    public static $primaryKey = 'my_id';
 
     /**
-     * Enforced by the constructor.
-     *
-     * @return array
+     * Optional.
      */
-    protected function getRequiredFields()
+    protected function getRequiredFields(): array
     {
         return [
             'userId'
@@ -112,6 +108,16 @@ namespace myApp;
 class App
 {
     /**
+     * Get 10 records without any conditions.
+     */
+    public function getLatest()
+    {
+        $mapperService = ...
+
+        return json_encode($mapperService->get(MyItemModel::class, [], [], 10));
+    }
+
+    /**
      * Inserting into the database.
      */
     public function insert()
@@ -120,8 +126,8 @@ class App
 
         // Create a new model object for insertion.
         $myModel = MyItemModel::getNew(['userId' => 33432])
-            ->setName('whatever you want.')
-            ->setDescription('A great description');
+            ->setName('whatever you want.') // If not using camel casing, 
+            ->setDescription('A great description'); // use setValue($property, $value) instead.
 
         // Insert new record in the database.
         $mapperService->persist($myModel);

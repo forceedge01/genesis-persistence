@@ -22,10 +22,7 @@ abstract class BaseModel implements ModelInterface
 
     const FORMAT_DATE = 'Date';
 
-    /**
-     * Every modal inherits an Id property.
-     */
-    protected $id = 'integer PRIMARY KEY';
+    public $data;
 
     /**
      * @var string
@@ -47,10 +44,13 @@ abstract class BaseModel implements ModelInterface
     private function __construct(array $data = [])
     {
         $this->class = get_called_class();
-        $properties = get_class_vars(get_called_class());
-        unset($properties['class']);
+        $this->data = new \stdClass();
+        $this->setData($data);
+    }
 
-        $this->setData($properties, $data);
+    public function getId()
+    {
+        return $this->data->{static::$primaryKey};
     }
 
     /**
@@ -73,7 +73,7 @@ abstract class BaseModel implements ModelInterface
         $property = $this->getProperty($name);
 
         if (strpos($name, self::METHOD_TYPE_GET) === 0) {
-            return $this->$property;
+            return $this->data->$property;
         } elseif (strpos($name, self::METHOD_TYPE_SET) === 0) {
             $this->setValue($property, $args[0]);
             return $this;
@@ -105,21 +105,12 @@ abstract class BaseModel implements ModelInterface
     /**
      * Set data on the object as specified.
      *
-     * @param array $properties
      * @param array $data
      */
-    protected function setData(array $properties, array $data)
+    protected function setData(array $data)
     {
         $this->setRequiredData($data);
-        $this->setOptionalData(array_keys($properties), $data);
-
-        // Don't format properties that are already set.
-        $properties = array_diff_key($properties, $data);
-
-        // All properties set to null.
-        foreach ($properties as $property => $type) {
-            $this->$property = null;
-        }
+        $this->setOptionalData($data);
     }
 
     /**
@@ -142,20 +133,11 @@ abstract class BaseModel implements ModelInterface
     }
 
     /**
-     * @param array $properties
      * @param array $data
      */
-    protected function setOptionalData(array $properties, array $data)
+    protected function setOptionalData(array $data)
     {
-        $properties[] = 'id';
-
         foreach ($data as $property => $value) {
-            if (array_search($property, $properties) === false) {
-                throw new Exception(
-                    "Property '$property' is not defined on class but was provided in data." . print_r($data, true)
-                );
-            }
-
             $this->setValue($property, $value);
         }
     }
@@ -171,21 +153,26 @@ abstract class BaseModel implements ModelInterface
      *
      * @return array
      */
-    abstract protected function getRequiredFields();
+    protected function getRequiredFields(): array
+    {
+        return [];
+    }
 
     /**
      * @param string $property
      * @param string $value
      */
-    private function setValue($property, $value)
+    public function setValue($property, $value): self
     {
         if (strpos($property, self::FORMAT_DATE) > 0 && $value) {
-            $this->$property = new DateTime($value);
+            $this->data->$property = new DateTime($value);
 
-            return;
+            return $this;
         }
 
-        $this->$property = $value;
+        $this->data->$property = $value;
+
+        return $this;
     }
 
     /**

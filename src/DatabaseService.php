@@ -50,15 +50,7 @@ class DatabaseService implements Contracts\StoreInterface
         }
     }
 
-    /**
-     * Save values to table.
-     *
-     * @param string $table The table to save values into.
-     * @param array $values The values to be saved.
-     *
-     * @return int
-     */
-    public function save($table, array $values)
+    public function save(string $table, array $values): int
     {
         list($columns, $values) = $this->getValuesClauseFromArray($values);
         $query =  "INSERT INTO `$table` $columns VALUES $values";
@@ -67,14 +59,7 @@ class DatabaseService implements Contracts\StoreInterface
         return $this->connection->lastInsertId();
     }
 
-    /**
-     * Execute sql query.
-     *
-     * @param string $query The query to execute.
-     *
-     * @return array
-     */
-    public function execute($query)
+    public function execute(string $query): array
     {
         $statement = $this->connection->prepare($query);
         $this->checkForErrors($query);
@@ -84,66 +69,34 @@ class DatabaseService implements Contracts\StoreInterface
         return $result;
     }
 
-    /**
-     * Get data by clause.
-     *
-     * @param string $table The table to get the data from.
-     * @param array $where The criteria.
-     * @param array $order The order clause.
-     *
-     * @return array
-     */
-    public function get($table, array $where, array $order = ['id' => 'asc'])
+    public function get($table, array $where = null, array $order = ['id' => 'asc'], int $limit = null): array
     {
         $whereClause = $this->getWhereClauseFromArray($where);
         $orderClause = $this->getOrderClause($order);
-        $query =  "SELECT * FROM `$table` $whereClause $orderClause";
+        $limitClause = $this->getLimitClause($limit);
+        $query =  "SELECT * FROM `$table` $whereClause $orderClause $limitClause";
 
         return $this->execute($query);
     }
 
-    /**
-     * Get data by clause.
-     *
-     * @param string $table The table to get the data from.
-     * @param array $order The order clause.
-     *
-     * @return array
-     */
-    public function getAll($table, array $order = ['id' => 'asc'])
+    public function getAll($table, array $order = ['id' => 'asc'], int $limit = null): array
     {
         $orderClause = $this->getOrderClause($order);
-        $query =  "SELECT * FROM `$table` $orderClause";
+        $limitClause = $this->getLimitClause($limit);
+        $query =  "SELECT * FROM `$table` $orderClause $limitClause";
 
         return $this->execute($query);
     }
 
-    /**
-     * Get data by clause.
-     *
-     * @param string $table The table to get the data from.
-     * @param array $where The criteria.
-     *
-     * @return array
-     */
-    public function getCount($table, array $where)
+    public function getCount(string $table, string $primaryKey, array $where): array
     {
         $whereClause = $this->getWhereClauseFromArray($where);
-        $query = "SELECT count(id) AS {$table}Count FROM `$table` $whereClause";
+        $query = "SELECT count($primaryKey) AS {$table}Count FROM `$table` $whereClause";
 
         return $this->execute($query);
     }
 
-    /**
-     * Get a single record or false if not found.
-     *
-     * @param string $table The table to get the data from.
-     * @param array $where The criteria.
-     * @param array $order The order clause.
-     *
-     * @return array|false
-     */
-    public function getSingle($table, array $where = [], array $order = ['id' => 'asc'])
+    public function getSingle(string $table, array $where = [], array $order = ['id' => 'asc']): ?array
     {
         $whereClause = '';
         $orderBy = '';
@@ -163,18 +116,10 @@ class DatabaseService implements Contracts\StoreInterface
             return $result[0];
         }
 
-        return false;
+        return null;
     }
 
-    /**
-     * Delete data.
-     *
-     * @param string $table The table to get the data from.
-     * @param array $where The criteria.
-     *
-     * @return $this
-     */
-    public function delete($table, array $where = [])
+    public function delete(string $table, array $where = []): self
     {
         $whereClause = '';
 
@@ -188,16 +133,7 @@ class DatabaseService implements Contracts\StoreInterface
         return $this;
     }
 
-    /**
-     * Update table data.
-     *
-     * @param string $table The table to get the data from.
-     * @param array $update The values to update.
-     * @param array $where The criteria.
-     *
-     * @return $this
-     */
-    public function update($table, array $update, array $where = [])
+    public function update(string $table, array $update, array $where = []): self
     {
         $updateClause = $this->getUpdateClauseFromArray($update);
 
@@ -211,30 +147,33 @@ class DatabaseService implements Contracts\StoreInterface
         return $this;
     }
 
-    /**
-     * Get order by clause as a string.
-     *
-     * @param array $order The order clause.
-     *
-     * @return string
-     */
-    public function getOrderClause(array $order)
+    public function getOrderClause(array $order): string
     {
+        if (empty($order)) {
+            return '';
+        }
+
         $column = key($order);
         $value = current($order);
 
         return "ORDER BY `$column` $value";
     }
 
-    /**
-     * Get where clause as string.
-     *
-     * @param array $whereArray The criteria.
-     *
-     * @return string
-     */
-    public function getWhereClauseFromArray(array $whereArray)
+    public function getLimitClause(int $limit = null): string
     {
+        if ($limit === null) {
+            return '';
+        }
+
+        return "limit $limit";
+    }
+
+    public function getWhereClauseFromArray(array $whereArray): string
+    {
+        if (empty($whereArray)) {
+            return '';
+        }
+
         $where = '';
 
         foreach ($whereArray as $column => $value) {
@@ -247,14 +186,7 @@ class DatabaseService implements Contracts\StoreInterface
         return 'WHERE ' . $where;
     }
 
-    /**
-     * Get update clause as string.
-     *
-     * @param array $updateArray The update clause.
-     *
-     * @return string
-     */
-    public function getUpdateClauseFromArray(array $updateArray)
+    public function getUpdateClauseFromArray(array $updateArray): string
     {
         $update = '';
 
@@ -268,14 +200,7 @@ class DatabaseService implements Contracts\StoreInterface
         return $update;
     }
 
-    /**
-     * Get values clause.
-     *
-     * @param array $values The values to get.
-     *
-     * @return array
-     */
-    public function getValuesClauseFromArray(array $values)
+    public function getValuesClauseFromArray(array $values): array
     {
         $columns = '(';
         $columnValues = '(';
@@ -295,7 +220,7 @@ class DatabaseService implements Contracts\StoreInterface
         return [$columns, $columnValues];
     }
 
-    private function getConnectionString(array $params)
+    private function getConnectionString(array $params): string
     {
         if (! isset($params['dbengine'])) {
             throw new Exception('The database engine must be specified.');
@@ -338,7 +263,6 @@ class DatabaseService implements Contracts\StoreInterface
             };
             $prex(
                 $this->connection->errorInfo(), $query
-                // ,get_class($this), get_class_methods($this)
             );
         }
     }
