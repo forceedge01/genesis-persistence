@@ -3,6 +3,8 @@
 namespace Genesis\Services\Persistence;
 
 use Exception;
+use Genesis\Services\Persistence\Contracts\MapperInterface;
+use Genesis\Services\Persistence\Contracts\ModelInterface;
 use ReflectionClass;
 
 /**
@@ -21,7 +23,7 @@ class MapperService implements Contracts\MapperInterface
     /**
      * @return Contracts\StoreInterface
      */
-    public function getDatabaseService()
+    public function getDatabaseService(): Contracts\StoreInterface
     {
         return $this->databaseService;
     }
@@ -31,7 +33,7 @@ class MapperService implements Contracts\MapperInterface
      *
      * @return array
      */
-    public function createTable($class)
+    public function createTable(string $class): array
     {
         $table = $this->getTableFromClass($class);
         $properties = $this->getPropertiesWithTypesFromClass($class);
@@ -58,36 +60,39 @@ class MapperService implements Contracts\MapperInterface
      *
      * @return Contracts\ModelInterface
      */
-    public function persist(Contracts\ModelInterface $object)
+    public function persist(Contracts\ModelInterface $object): Contracts\ModelInterface
     {
-        $class = get_class($object);
-        $properties = $this->getPropertiesFromClass($class);
+        $properties = $this->getPropertiesFromClass($object);
 
+        $class = get_class($object);
         $table = $this->getTableFromClass($class);
         $values = $this->getPropertiesValue($object, $properties);
 
-        if (! empty($values['id'])) {
-            return $this->databaseService->update($table, $values, ['id' => $values['id']]);
+        if (property_exists($object->data, $object::$primaryKey)) {
+            $this->databaseService->update(
+                $table,
+                $values,
+                [$object::$primaryKey => $object->data->{$object::$primaryKey}]
+            );
+
+            return $object;
         }
 
-        // If the id column is present and we are about to save this as a new record,
-        // remove it so its not part of the sql query.
-        unset($values['id']);
-
         $id = $this->databaseService->save($table, $values);
-        $object->setId($id);
+        $method = 'set' . ucfirst($object::$primaryKey);
+        $object->$method($id);
 
         return $object;
     }
 
     /**
      * @param string $class The class name.
-     * @param array $where The criteria.
-     * @param array $order The order of the results retrieved.
+     * @param array  $where The criteria.
+     * @param array  $order The order of the results retrieved.
      *
      * @return Contracts\ModelInterface[]
      */
-    public function get($class, array $where = [], array $order = ['id' => 'asc'])
+    public function get(string $class, array $where = [], array $order = ['id' => 'asc'], int $limit = null): array
     {
         if (! in_array(Contracts\ModelInterface::class, class_implements($class))) {
             throw new Exception("Invalid class given: '$class', must implement BaseModel!");
@@ -96,9 +101,9 @@ class MapperService implements Contracts\MapperInterface
         $table = $this->getTableFromClass($class);
 
         if ($where) {
-            $data = $this->databaseService->get($table, $where, $order);
+            $data = $this->databaseService->get($table, $where, $order, $limit);
         } else {
-            $data = $this->databaseService->getAll($table, $order);
+            $data = $this->databaseService->getAll($table, $order, $limit);
         }
 
         return $this->bindToModel($class, $data);
@@ -107,43 +112,43 @@ class MapperService implements Contracts\MapperInterface
     /**
      * @param string $class The class name.
      *
-     * @return Contracts\ModelInterface|false
+     * @return Contracts\ModelInterface|null
      */
-    public function getSingle($class, array $where = [], array $order = ['id' => 'asc'])
+    public function getSingle(string $class, array $where = [], array $order = ['id' => 'asc']): ?Contracts\ModelInterface
     {
         $table = $this->getTableFromClass($class);
-        $data = $this->databaseService->getSingle($table, $where, $order);
+        $data = $this->databaseService->getSingle($table, $where, $order, 1);
 
-        if ($data) {
+        if ($data !== null) {
             $collection = $this->bindToModel($class, [$data]);
 
             return $collection[0];
         }
 
-        return false;
+        return null;
     }
 
     /**
      * @param string $class The class to fetch the count for.
-     * @param array $where The criteria.
+     * @param array  $where The criteria.
      *
      * @return int
      */
-    public function getCount($class, array $where)
+    public function getCount($class, array $where = []): int
     {
         $table = $this->getTableFromClass($class);
-        $data = $this->databaseService->getCount($table, $where);
+        $data = $this->databaseService->getCount($table, $class::$primaryKey, $where);
 
         return $data[0]["{$table}Count"];
     }
 
     /**
-     * @param string $associatedClass The associated class.
-     * @param Contracts\ModelInterface $fromObject The association object.
+     * @param string                   $associatedClass The associated class.
+     * @param Contracts\ModelInterface $fromObject      The association object.
      *
      * @return Contracts\ModelInterface|false
      */
-    public function getAssociated($associatedClass, Contracts\ModelInterface $fromObject)
+    public function getAssociated($associatedClass, Contracts\ModelInterface $fromObject): ?Contracts\ModelInterface
     {
         // Check if the associated class has a property on the fromObject.
         $table = $this->getTableFromClass($associatedClass);
@@ -168,27 +173,35 @@ class MapperService implements Contracts\MapperInterface
 
     /**
      * @param string $class The class name.
-     * @param array $where The criteria.
+     * @param array  $where The criteria.
      *
      * @return Contracts\StoreInterface
      */
-    public function delete($class, array $where = [])
+    public function delete(string $class, array $where = []): MapperInterface
     {
         if (is_object($class)) {
             $obj = $class;
-            $class = get_class($obj);
-            $id = $obj->getId();
+            $class = get_class($class);
 
-            if (! $id) {
+            if (!property_exists($obj->data, $class::$primaryKey)) {
                 throw new Exception("Object of type '$class' passed in must have an id to perform operation.");
             }
 
-            $where = ['id' => $id];
+            $id = $obj->data->{$class::$primaryKey};
+            $where = [$class::$primaryKey => $id];
         }
 
         $table = $this->getTableFromClass($class);
+        $this->databaseService->delete($table, $where);
 
-        return $this->databaseService->delete($table, $where);
+        return $this;
+    }
+
+    public function deleteById(string $class, $id): self
+    {
+        $this->delete($class, [$class::$primaryKey => $id]);
+
+        return $this;
     }
 
     /**
@@ -196,8 +209,20 @@ class MapperService implements Contracts\MapperInterface
      *
      * @return string
      */
-    public function getTableFromClass($class)
+    public function getTableFromClass($class): string
     {
+        if (! is_object($class) && ! is_string($class)) {
+            throw new Exception('Operation can only be performed on class string or object.');
+        }
+
+        if (is_object($class)) {
+            $class = get_class($class);
+        }
+
+        if (property_exists($class, 'table')) {
+            return $class::$table;
+        }
+
         $chunks = explode('\\', $class);
 
         return end($chunks);
@@ -205,11 +230,11 @@ class MapperService implements Contracts\MapperInterface
 
     /**
      * @param string $class The class name.
-     * @param array $data The data to bind.
+     * @param array  $data  The data to bind.
      *
      * @return Contracts\ModelInterface[]
      */
-    public function bindToModel($class, array $data)
+    public function bindToModel(string $class, array $data): array
     {
         if (! in_array(Contracts\ModelInterface::class, class_implements($class))) {
             throw new Exception("Class '$class' does not implmenet interface " . Contracts\ModelInterface::class);
@@ -236,32 +261,22 @@ class MapperService implements Contracts\MapperInterface
      *
      * @return array
      */
-    public function getPropertiesWithTypesFromClass($class)
+    public function getPropertiesWithTypesFromClass(string $class): array
     {
         return $this->getReflection($class)->getDefaultProperties();
     }
 
     /**
      * Get all properties from a class.
-     *
-     * @param string $class The class.
-     *
-     * @return array
      */
-    private function getPropertiesFromClass($class)
+    private function getPropertiesFromClass(ModelInterface $object): array
     {
-        return array_keys($this->getReflection($class)->getDefaultProperties());
+        return get_object_vars($object->data);
     }
 
-    private function getPropertiesValue(Contracts\ModelInterface $object, array $properties)
+    private function getPropertiesValue(Contracts\ModelInterface $object, array $properties): array
     {
-        $values = [];
-        foreach ($properties as $property) {
-            $call = 'get' . ucfirst($property);
-            $values[$property] = $object->$call();
-        }
-
-        return $values;
+        return (array) $object->data;
     }
 
     private function getReflection($class)

@@ -5,7 +5,7 @@ namespace Genesis\Services\Test\Persistence;
 use Genesis\Services\Persistence\MapperService;
 use Genesis\Services\Persistence\DatabaseService;
 use Genesis\Services\Persistence\Model\BaseModel;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
 class MapperModelTester extends BaseModel
@@ -14,7 +14,7 @@ class MapperModelTester extends BaseModel
 
     protected $name = 'text not null';
 
-    protected function getRequiredFields()
+    protected function getRequiredFields(): array
     {
         return ['userId'];
     }
@@ -26,7 +26,7 @@ class MapperModelTester2
 
     protected $name = 'text not null';
 
-    protected function getRequiredFields()
+    protected function getRequiredFields(): array
     {
         return ['userId'];
     }
@@ -34,16 +34,16 @@ class MapperModelTester2
 
 class User extends BaseModel
 {
-    protected function getRequiredFields()
+    protected function getRequiredFields(): array
     {
         return [];
     }
 }
 
-class MapperServiceTest extends PHPUnit_Framework_TestCase
+class MapperServiceTest extends TestCase
 {
     /**
-     * @var object  The object to be tested.
+     * @var object The object to be tested.
      */
     private $testObject;
 
@@ -53,7 +53,7 @@ class MapperServiceTest extends PHPUnit_Framework_TestCase
     private $reflection;
 
     /**
-     * @var array  The test object dependencies.
+     * @var array The test object dependencies.
      */
     private $dependencies = [];
 

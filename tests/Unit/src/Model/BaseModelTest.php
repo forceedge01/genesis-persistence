@@ -4,7 +4,7 @@ namespace Genesis\Services\Test\Persistence\Model;
 
 use DateTime;
 use Genesis\Services\Persistence\Model\BaseModel;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
 class BaseModelTester extends BaseModel
@@ -15,16 +15,16 @@ class BaseModelTester extends BaseModel
 
     protected $createdDate = 'text not null';
 
-    protected function getRequiredFields()
+    protected function getRequiredFields(): array
     {
         return ['userId'];
     }
 }
 
-class BaseModelTest extends PHPUnit_Framework_TestCase
+class BaseModelTest extends TestCase
 {
     /**
-     * @var object  The object to be tested.
+     * @var object The object to be tested.
      */
     private $testObject;
 
@@ -34,7 +34,7 @@ class BaseModelTest extends PHPUnit_Framework_TestCase
     private $reflection;
 
     /**
-     * @var array  The test object dependencies.
+     * @var array The test object dependencies.
      */
     private $dependencies = [];
 

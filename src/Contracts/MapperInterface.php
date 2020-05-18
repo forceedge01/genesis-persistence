@@ -7,15 +7,15 @@ namespace Genesis\Services\Persistence\Contracts;
  */
 interface MapperInterface
 {
-    public function createTable($class);
+    public function createTable(string $class): array;
 
-    public function delete($class, array $where = []);
+    public function delete(string $class, array $where = []): MapperInterface;
 
-    public function persist(ModelInterface $object);
+    public function persist(ModelInterface $object): ModelInterface;
 
-    public function get($class, array $args = [], array $order = ['id' => 'asc']);
+    public function get(string $class, array $args = [], array $order = ['id' => 'asc']): array;
 
-    public function getSingle($class, array $args = [], array $order = ['id' => 'asc']);
+    public function getSingle(string $class, array $args = [], array $order = ['id' => 'asc']): ?ModelInterface;
 
-    public function getAssociated($associatedClass, ModelInterface $object);
+    public function getAssociated($associatedClass, ModelInterface $object): ?ModelInterface;
 }
