@@ -7,7 +7,7 @@ namespace Genesis\Services\Persistence\Contracts;
  */
 interface StoreInterface
 {
-    public function save(string $table, array $values);
+    public function save(string $table, array $values): int;
 
     public function get(string $table, array $where, array $order = ['id' => 'asc']);
 

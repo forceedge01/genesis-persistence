@@ -3,13 +3,13 @@
 namespace Genesis\Services\Test\Persistence;
 
 use Genesis\Services\Persistence\DatabaseService;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
-class DatabaseServiceTest extends PHPUnit_Framework_TestCase
+class DatabaseServiceTest extends TestCase
 {
     /**
-     * @var object  The object to be tested.
+     * @var object The object to be tested.
      */
     private $testObject;
 
@@ -19,7 +19,7 @@ class DatabaseServiceTest extends PHPUnit_Framework_TestCase
     private $reflection;
 
     /**
-     * @var array  The test object dependencies.
+     * @var array The test object dependencies.
      */
     private $dependencies = [];
 

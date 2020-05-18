@@ -69,7 +69,7 @@ class DatabaseService implements Contracts\StoreInterface
         return $result;
     }
 
-    public function get($table, array $where = null, array $order = ['id' => 'asc'], int $limit = null): array
+    public function get(string $table, array $where = null, array $order = ['id' => 'asc'], int $limit = null): array
     {
         $whereClause = $this->getWhereClauseFromArray($where);
         $orderClause = $this->getOrderClause($order);
@@ -79,7 +79,7 @@ class DatabaseService implements Contracts\StoreInterface
         return $this->execute($query);
     }
 
-    public function getAll($table, array $order = ['id' => 'asc'], int $limit = null): array
+    public function getAll(string $table, array $order = ['id' => 'asc'], int $limit = null): array
     {
         $orderClause = $this->getOrderClause($order);
         $limitClause = $this->getLimitClause($limit);

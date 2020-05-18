@@ -3,6 +3,7 @@
 namespace Genesis\Services\Persistence;
 
 use Exception;
+use Genesis\Services\Persistence\Contracts\MapperInterface;
 use Genesis\Services\Persistence\Contracts\ModelInterface;
 use ReflectionClass;
 
@@ -32,7 +33,7 @@ class MapperService implements Contracts\MapperInterface
      *
      * @return array
      */
-    public function createTable($class): array
+    public function createTable(string $class): array
     {
         $table = $this->getTableFromClass($class);
         $properties = $this->getPropertiesWithTypesFromClass($class);
@@ -91,7 +92,7 @@ class MapperService implements Contracts\MapperInterface
      *
      * @return Contracts\ModelInterface[]
      */
-    public function get($class, array $where = [], array $order = ['id' => 'asc'], int $limit = null): array
+    public function get(string $class, array $where = [], array $order = ['id' => 'asc'], int $limit = null): array
     {
         if (! in_array(Contracts\ModelInterface::class, class_implements($class))) {
             throw new Exception("Invalid class given: '$class', must implement BaseModel!");
@@ -113,7 +114,7 @@ class MapperService implements Contracts\MapperInterface
      *
      * @return Contracts\ModelInterface|null
      */
-    public function getSingle($class, array $where = [], array $order = ['id' => 'asc']): ?Contracts\ModelInterface
+    public function getSingle(string $class, array $where = [], array $order = ['id' => 'asc']): ?Contracts\ModelInterface
     {
         $table = $this->getTableFromClass($class);
         $data = $this->databaseService->getSingle($table, $where, $order, 1);
@@ -176,7 +177,7 @@ class MapperService implements Contracts\MapperInterface
      *
      * @return Contracts\StoreInterface
      */
-    public function delete($class, array $where = []): self
+    public function delete(string $class, array $where = []): MapperInterface
     {
         if (is_object($class)) {
             $obj = $class;
